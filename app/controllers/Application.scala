@@ -20,6 +20,10 @@ object Application extends Controller {
   )
   """.execute.apply()
 
+  Seq("Alice", "Bob", "Chris") foreach { name =>
+    sql"insert into members (name, created_at) values (${name}, current_timestamp)".update.apply()
+  }
+
   def index = Action {
     Ok(views.html.index("Your new application is ready."))
   }
