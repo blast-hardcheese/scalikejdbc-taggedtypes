@@ -24,6 +24,15 @@ object Application extends Controller {
     sql"insert into members (name, created_at) values (${name}, current_timestamp)".update.apply()
   }
 
+  type FirstName = String
+  type LastName = String
+  type CreatedAt = DateTime
+  type Person = (FirstName, LastName, CreatedAt)
+
+  def getUser(n: FirstName): Option[Person] = {
+    sql"select * from members where name = ${n}".map({ r => (r.string("name"), "Smith", r.jodaDateTime("created_at")) }).first.apply
+  }
+
   def index = Action {
     Ok(views.html.index("Your new application is ready."))
   }
