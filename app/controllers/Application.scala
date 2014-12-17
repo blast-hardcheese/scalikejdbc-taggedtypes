@@ -34,7 +34,11 @@ object Application extends Controller {
   }
 
   def index = Action {
-    Ok(views.html.index("Your new application is ready."))
+    val entities: List[Map[String, Any]] = sql"select * from members".map(_.toMap).list.apply()
+    val user = getUser("Alice")
+    println(s"Person: $user")
+
+    Ok(entities.toString)
   }
 
 }
