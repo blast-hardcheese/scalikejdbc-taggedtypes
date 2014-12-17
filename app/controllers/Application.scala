@@ -20,10 +20,11 @@ trait Types {
   self: TaggedTypes =>
 
   class UserId
-  class _FirstName
-  class _LastName
+  class FirstName
+  class LastName
+  class CreatedAt
 
-  type User = (Long @@ UserId, String @@ _FirstName, String @@ _LastName)
+  type User = (String @@ FirstName, String @@ LastName, DateTime @@ CreatedAt)
 }
 
 object Application extends Controller with TaggedTypes with Types {
@@ -44,21 +45,14 @@ object Application extends Controller with TaggedTypes with Types {
     sql"insert into members (name, created_at) values (${name}, current_timestamp)".update.apply()
   }
 
-  type FirstName = String
-  type LastName = String
-  type CreatedAt = DateTime
-  type Person = (FirstName, LastName, CreatedAt)
-
-  def getUser(n: FirstName): Option[Person] = {
-    sql"select * from members where name = ${n}".map({ r => (r.string("name"), "Smith", r.jodaDateTime("created_at")) }).first.apply
+  def getUser(n: String @@ FirstName): Option[User] = {
+    sql"select * from members where name = ${n}".map({ r => (r.string("name"), "Smith", r.jodaDateTime("created_at")): User }).first.apply
   }
 
   def index = Action {
-    val entities: List[Map[String, Any]] = sql"select * from members".map(_.toMap).list.apply()
     val user = getUser("Alice")
     println(s"Person: $user")
 
-    Ok(entities.toString)
+    Ok(s"""Found "Alice": $user""")
   }
-
 }
