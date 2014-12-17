@@ -14,6 +14,12 @@ trait TaggedTypes {
 
   implicit def lift[A, B](x: A): A @@ B = x.asInstanceOf[A @@ B]
   implicit def unlift[A, B](x: A @@ B): A = x.asInstanceOf[A]
+
+  class SuperTuple3[A1, A2, B1, B2, C1, C2](a: A1 @@ A2, b: B1 @@ B2, c: C1 @@ C2) extends Tuple3[A1 @@ A2, B1 @@ B2, C1 @@ C2](a, b, c) {
+    def get[_ <: (A1 @@ A2)]: A1 @@ A2 = a
+  }
+
+  implicit def superTuple3[A1,A2, B1, B2, C1, C2](t: (A1 @@ A2, B1 @@ B2, C1 @@ C2)): SuperTuple3[A1,A2,B1,B2,C1,C2] = new SuperTuple3(t._1, t._2, t._3)
 }
 
 trait Types {
@@ -51,6 +57,9 @@ object Application extends Controller with TaggedTypes with Types {
 
   def index = Action {
     val user = getUser("Alice")
+    // val lastname = user map { _.get[String @@ LastName] } // Won't compile
+    val firstname = user map { _.get[String @@ FirstName] }
+    println(s"Person: $firstname")
     println(s"Person: $user")
 
     Ok(s"""Found "Alice": $user""")
