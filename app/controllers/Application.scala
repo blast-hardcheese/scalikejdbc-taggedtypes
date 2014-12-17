@@ -6,7 +6,27 @@ import org.joda.time._
 
 import scalikejdbc._
 
-object Application extends Controller {
+trait TaggedTypes {
+  import scala.language.implicitConversions
+
+  type Tagged[A] = { type Tag = A }
+  type @@[A, B] = A with Tagged[B]
+
+  implicit def lift[A, B](x: A): A @@ B = x.asInstanceOf[A @@ B]
+  implicit def unlift[A, B](x: A @@ B): A = x.asInstanceOf[A]
+}
+
+trait Types {
+  self: TaggedTypes =>
+
+  class UserId
+  class _FirstName
+  class _LastName
+
+  type User = (Long @@ UserId, String @@ _FirstName, String @@ _LastName)
+}
+
+object Application extends Controller with TaggedTypes with Types {
   Class.forName("org.h2.Driver")
   ConnectionPool.singleton("jdbc:h2:mem:hello", "user", "pass")
 
