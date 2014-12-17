@@ -24,7 +24,7 @@ trait Types {
   class LastName
   class CreatedAt
 
-  type User = (String @@ FirstName, String @@ LastName, DateTime @@ CreatedAt)
+  type User = (Long @@ UserId, String @@ FirstName, String @@ LastName, DateTime @@ CreatedAt)
 }
 
 object Application extends Controller with TaggedTypes with Types {
@@ -46,7 +46,7 @@ object Application extends Controller with TaggedTypes with Types {
   }
 
   def getUser(n: String @@ FirstName): Option[User] = {
-    sql"select * from members where name = ${n}".map({ r => (r.string("name"), "Smith", r.jodaDateTime("created_at")): User }).first.apply
+    sql"select * from members where name = ${n}".map({ r => (r.long("id"), r.string("name"), "Smith", r.jodaDateTime("created_at")): User }).first.apply
   }
 
   def index = Action {
